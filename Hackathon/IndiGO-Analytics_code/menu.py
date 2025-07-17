@@ -1,18 +1,24 @@
 '''
-This file creates a clean, user-friendly GUI dashboard that lets users
- choose which analysis they want to run
+This file creates a clean, user-friendly GUI dashboard for IndiGO Analytics.
+Features:
+- Top 3 busiest air sectors
+- Passenger demand prediction
+- Airline market share trends
+- Delay pattern visualizations
+- Forecasting future demand via ML
+The GUI is built using Tkinter and connects to analysis & visualization modules.
 
+⚠️ IMPORTANT: This application might take a few **seconds to load and respond** due to the 
+use of **large real-world aviation datasets**. Please be patient while the data is being processed.
 '''
-
-
 
 from tkinter import *
 from tkinter import ttk
 from data_loader import DataLoader
 from analysis_engine import AnalysisEngine
-import visualization as viz  # your visual functions
+import visualization as viz 
 
-# 1. Load & clean
+# 1. Load & clean data from CSV files
 loader = DataLoader(
     "D:/learning/sic_pu_june25/Hackathon/IndiGO-Analytics_datasets/city.csv",
     "D:/learning/sic_pu_june25/Hackathon/IndiGO-Analytics_datasets/carrier.csv",
@@ -21,14 +27,14 @@ loader = DataLoader(
 loader.load_data()
 loader.clean_data()
 
-engine = AnalysisEngine(loader.city_df, loader.carrier_df, loader.delay_df)
+engine = AnalysisEngine(loader.city_df, loader.carrier_df, loader.delay_df) # 2. Initialize analysis engine with the cleaned data
 
-def show_top_sectors():
+def show_top_sectors(): # Display top 3 busiest sectors using passenger traffic.
     top3 = engine.top_sectors()
     print(top3)
     viz.plot_top_sectors(top3)
 
-def show_demand_prediction():
+def show_demand_prediction(): # Open a sub-window to take route & year input, then plot predicted demand.
     def run_prediction():
         origin = origin_entry.get().upper().strip()
         destination = dest_entry.get().upper().strip()
@@ -65,12 +71,12 @@ def show_demand_prediction():
 
     Button(pred_window, text="Predict", command=run_prediction).pack(pady=5)
 
-def show_market_share():
+def show_market_share(): # Analyze market share of airlines over years.
     share_df = engine.airline_market_share()
     print(share_df.head())
     viz.plot_market_share(share_df)
 
-def show_flight_delays():
+def show_flight_delays(): # Open sub-window to select between delay analysis types.
     def show_airlines():
         airlines, _, _ = engine.flight_delay_patterns()
         viz.plot_delay_analysis(airlines, None, None)
@@ -93,7 +99,7 @@ def show_flight_delays():
     Button(delay_window, text="Common Delay Reasons", command=show_reasons).pack(pady=5)
 
 
-def show_forecast():
+def show_forecast():# Take future years input and forecast passenger demand on a route.
     def run_forecast():
         origin = origin_entry.get().upper().strip()
         destination = dest_entry.get().upper().strip()
@@ -128,6 +134,8 @@ def show_forecast():
     error_label.pack(pady=5)
 
     Button(forecast_window, text="Run Forecast", command=run_forecast).pack(pady=5)
+
+# === GUI Layout ===
 
 root = Tk()
 root.title("IndiGO Analytics Dashboard")
