@@ -17,12 +17,12 @@ from sklearn.linear_model import LinearRegression
 import numpy as np
 
 class AnalysisEngine:
-    def __init__(self,city_df,carrier_df,delay_df=None):
+    def __init__(self,city_df,carrier_df,delay_df=None):# Initialize the analytics engine with preloaded DataFrames
         self.city_df = city_df
         self.carrier_df = carrier_df
         self.delay_df = delay_df
 
-    def top_sectors(self): # Picks the top 3 sectors
+    def top_sectors(self): #  Finds the top 3 busiest air routes based on total passenger traffic.
         self.city_df["Passenger_count"] = self.city_df["PaxToCity2"] + self.city_df["PaxFromCity2"]
         grouped = self.city_df.groupby(["Origin","Destination"])
         sector_traffic  = grouped["Passenger_count"].sum().reset_index()
@@ -31,7 +31,7 @@ class AnalysisEngine:
 
         return top_3
     
-    def predict_demand(self, Origin, Destination, Year=None):
+    def predict_demand(self, Origin, Destination, Year=None): #Returns past passenger data for a specific route (optionally filtered by year).
         self.city_df["Passenger_count"] = self.city_df["PaxToCity2"] + self.city_df["PaxFromCity2"]
         grouped = self.city_df.groupby(["Origin", "Destination", "Year"])
         grouped_sum = grouped["Passenger_count"].sum().reset_index()
@@ -43,7 +43,7 @@ class AnalysisEngine:
 
         return route_data
     
-    def airline_market_share(self):  # Figure out which airline is growing in market share year-over-year
+    def airline_market_share(self): # Calculates yearly market share % for each airline to spot growth trends.
         self.carrier_df.columns = self.carrier_df.columns.str.strip()
         grouped = self.carrier_df.groupby(["Airline","Year"])["Passengers"].sum().reset_index()
         airline_data = grouped
@@ -56,7 +56,7 @@ class AnalysisEngine:
 
         return result
     
-    def flight_delay_patterns(self, top_n = 5):
+    def flight_delay_patterns(self, top_n = 5): # Shows top delayed airlines, routes, and most common delay reasons.
             df = self.delay_df.copy()
             df.columns = df.columns.str.strip()
 
@@ -90,7 +90,7 @@ class AnalysisEngine:
             return airline_delays, route_delays, reason_df
     
     
-    def forecast_demand(self, origin, destination, future_years=[2025, 2026]):
+    def forecast_demand(self, origin, destination, future_years=[2025, 2026]):#Predicts future passenger demand on a route using linear regression.
         self.city_df["Passenger_count"] = self.city_df["PaxToCity2"] + self.city_df["PaxFromCity2"]
         grouped = self.city_df.groupby(["Origin", "Destination", "Year"])["Passenger_count"].sum().reset_index()
         route_data = grouped[(grouped["Origin"] == origin) & (grouped["Destination"] == destination)]
